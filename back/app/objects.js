@@ -39,13 +39,18 @@ router.post('/', upload.single('image'), async (req, res) => {
         object.image = req.file.filename;
     }
 
-    const result = await mysqlDb.getConnection().query(
-        'INSERT INTO `objects` (`category_id`, `place_id`, `name`, `description`, `image`) VALUES ' +
-        '(?, ?, ?, ?, ?)',
-        [object.categoryId, object.placeId, object.name, object.description, object.image]
-    );
+    if (!object.categoryId || !object.placeId || !object.name) {
+        res.send('Missing required keys of categoryId or placeId or name')
+    } else {
+        const result = await mysqlDb.getConnection().query(
+            'INSERT INTO `objects` (`category_id`, `place_id`, `name`, `description`, `image`) VALUES ' +
+            '(?, ?, ?, ?, ?)',
+            [object.categoryId, object.placeId, object.name, object.description, object.image]
+        );
+        object.id = result.insertId;
 
-    res.send({id: result.insertId});
+        res.send(object);
+    }
 });
 
 router.delete('/:id', async (req, res) => {

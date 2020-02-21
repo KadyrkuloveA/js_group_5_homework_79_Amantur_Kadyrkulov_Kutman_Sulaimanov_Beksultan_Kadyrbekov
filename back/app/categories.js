@@ -22,13 +22,19 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     const object = req.body;
 
-    const result = await mysqlDb.getConnection().query(
-        'INSERT INTO `categories` (`name`, `description`) VALUES ' +
-        '(?, ?)',
-        [object.name, object.description]
-    );
+    if (!object.name) {
+        res.send('Please add name of this category');
+    } else {
+        const result = await mysqlDb.getConnection().query(
+            'INSERT INTO `categories` (`name`, `description`) VALUES ' +
+            '(?, ?)',
+            [object.name, object.description]
+        );
 
-    res.send({id: result.insertId});
+        object.id = result.insertId;
+
+        res.send(object);
+    }
 });
 
 router.delete('/:id', async (req, res) => {
